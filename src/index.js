@@ -44,16 +44,14 @@ function preload() {
 
 // setting up game scene
 function create() {
-  player = this.physics.add
-    .image(config.width / 2, config.height - 50, "ship")
-    .setCircle(10);
+  player = this.physics.add.image(config.width / 2, config.height - 50, "ship");
   cursors = this.input.keyboard.createCursorKeys();
   spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
   // Creating a group for bullets
   bullets = this.physics.add.group({
     defaultKey: "bullet",
-    maxSize: 10
+    maxSize: 100
   });
 
   // Creating a group for enemies
@@ -62,7 +60,7 @@ function create() {
   // Creating a group for enemy bullets
   enemyBullets = this.physics.add.group({
     defaultKey: "enemyBullet",
-    maxSize: 10
+    maxSize: 100
   });
 
   // Collisions between player bullets and enemies
@@ -72,6 +70,7 @@ function create() {
     (bullet, enemy) => {
       bullets.killAndHide(bullet);
       bullet.body.enable = false;
+      bullet.destroy();
       enemies.killAndHide(enemy);
       enemy.body.enable = false;
     },
@@ -81,12 +80,14 @@ function create() {
 
   // Collisions between enemy bullets and player
   this.physics.add.collider(
-    enemyBullets,
     player,
-    (enemyBullet, player) => {
+    enemyBullets,
+    (player, enemyBullet) => {
       //enemyBullet.body.enable = false;
+      //enemyBullet.destroy();
       enemyBullets.killAndHide(enemyBullet);
       enemyBullet.body.enable = false;
+      enemyBullet.destroy();
       playerLives -= 1;
       console.log("Hit", playerLives);
 
@@ -170,9 +171,9 @@ function update(time, delta) {
   }, this);
 
   // recycle enemy bullets
-  enemyBullets.children.each(function (enemyBullet) {
-    if (enemyBullet.y + 150 > config.height) {
-      enemyBullets.killAndHide(enemyBullet);
+  enemyBullets.children.each(function (eBullet) {
+    if (eBullet.y > config.height) {
+      enemyBullets.killAndHide(eBullet);
     }
   }, this);
 }
